@@ -16,3 +16,13 @@ export const ALL_BOOKS = gql`
     }
   }
 `
+
+export const ADD_AUTHOR = gql`
+  mutation addAuthor($authorInput: AuthorInput!) {
+    addAuthor(input: $authorInput) {
+      id
+      firstName
+      lastName
+    }
+  }
+`
