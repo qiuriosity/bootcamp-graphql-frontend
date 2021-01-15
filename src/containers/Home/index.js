@@ -11,20 +11,16 @@ const Authors = () => {
     error: allAuthorsError,
   } = useQuery(ALL_AUTHORS)
 
-  if (allAuthorsError) {
-    throw new Error('query failed')
-  }
-
   const [addAuthor, {
     loading: addAuthorLoading,
     error: addAuthorError,
   }] = useMutation(ADD_AUTHOR, {
     update: (client, { data }) => {
       try {
-        const prev = client.readQuery({ query: ALL_AUTHORS })
-        prev.allAuthors = [...prev.allAuthors, data.createAuthor]
+        const temp = client.readQuery({ query: ALL_AUTHORS })
+        temp.allAuthors = [...temp.allAuthors, data.addAuthor]
 
-        client.writeQuery({ query: ALL_AUTHORS, prev })
+        client.writeQuery({ query: ALL_AUTHORS, temp })
       } catch (err) {
         throw new Error('query failed')
       }
@@ -33,15 +29,16 @@ const Authors = () => {
       authorInput: {
         firstName: 'Emily',
         lastName: 'Qiu',
-        age: 18,
-        email: 'someemail@gmail.com',
-        numBooksPublished: 2,
       },
     },
   })
 
+  if (allAuthorsError) {
+    return <p>{allAuthorsError.graphQLErrors[0].message}</p>
+  }
+
   if (addAuthorError) {
-    throw new Error('error')
+    return <p>{addAuthorError.graphQLErrors[0].message}</p>
   }
 
   return (
@@ -50,8 +47,7 @@ const Authors = () => {
       <button onClick={addAuthor}>add me</button>
       {allAuthorsLoading || addAuthorLoading ? 'loading...' : allAuthorsData.allAuthors.map(author => (
         <>
-          <p>{author.firstName}</p>
-          <p>{author.lastName}</p>
+          <p key={author.id}>{`${author.firstName} ${author.lastName}`}</p>
         </>
       ))}
     </>
